@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+var (
+	kSuccess = []byte("success")
+)
+
 func NewRequest(method, url string, params url.Values) (*http.Request, error) {
 	var m = strings.ToUpper(method)
 	var body io.Reader
@@ -26,7 +30,7 @@ func NewRequest(method, url string, params url.Values) (*http.Request, error) {
 	return http.NewRequest(m, url, body)
 }
 
-func (this *AliPay) NotifyVerify(partnerId, notifyId string) bool {
+func (this *Client) NotifyVerify(partnerId, notifyId string) bool {
 	var param = url.Values{}
 	param.Add("service", "notify_verify")
 	param.Add("partner", partnerId)
@@ -52,13 +56,12 @@ func (this *AliPay) NotifyVerify(partnerId, notifyId string) bool {
 	return false
 }
 
-func (this *AliPay) GetTradeNotification(req *http.Request) (*TradeNotification, error) {
-	return GetTradeNotification(req, this.AliPayPublicKey)
-}
-
-func GetTradeNotification(req *http.Request, aliPayPublicKey []byte) (noti *TradeNotification, err error) {
+func (this *Client) GetTradeNotification(req *http.Request) (noti *TradeNotification, err error) {
 	if req == nil {
 		return nil, errors.New("request 参数不能为空")
+	}
+	if err = req.ParseForm(); err != nil {
+		return nil, err
 	}
 
 	noti = &TradeNotification{}
@@ -68,7 +71,7 @@ func GetTradeNotification(req *http.Request, aliPayPublicKey []byte) (noti *Trad
 	noti.NotifyType = req.FormValue("notify_type")
 	noti.NotifyTime = req.FormValue("notify_time")
 	noti.TradeNo = req.FormValue("trade_no")
-	noti.TradeStatus = req.FormValue("trade_status")
+	noti.TradeStatus = TradeStatus(req.FormValue("trade_status"))
 	noti.TotalAmount = req.FormValue("total_amount")
 	noti.ReceiptAmount = req.FormValue("receipt_amount")
 	noti.InvoiceAmount = req.FormValue("invoice_amount")
@@ -99,9 +102,18 @@ func GetTradeNotification(req *http.Request, aliPayPublicKey []byte) (noti *Trad
 	//	return nil, errors.New("不是有效的 Notify")
 	//}
 
-	ok, err := verifySign(req.Form, aliPayPublicKey)
+	ok, err := this.VerifySign(req.Form)
 	if ok == false {
 		return nil, err
 	}
 	return noti, err
+}
+
+func (this *Client) AckNotification(w http.ResponseWriter) {
+	AckNotification(w)
+}
+
+func AckNotification(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusOK)
+	w.Write(kSuccess)
 }

@@ -1,13 +1,14 @@
 package alipay_test
 
 import (
-	"github.com/smartwalle/alipay"
 	"testing"
+
+	alipay "github.com/smartwalle/alipay/v3"
 )
 
-func TestAliPay_TradeAppPay(t *testing.T) {
+func TestClient_TradeAppPay(t *testing.T) {
 	t.Log("========== TradeAppPay ==========")
-	var p = alipay.AliPayTradeAppPay{}
+	var p = alipay.TradeAppPay{}
 	p.NotifyURL = "http://203.86.24.181:3000/alipay"
 	p.Body = "body"
 	p.Subject = "商品标题"
@@ -21,15 +22,23 @@ func TestAliPay_TradeAppPay(t *testing.T) {
 	t.Log(param)
 }
 
-func TestAliPay_TradePagePay(t *testing.T) {
+func TestClient_TradePagePay(t *testing.T) {
 	t.Log("========== TradePagePay ==========")
-	var p = alipay.AliPayTradePagePay{}
+	var p = alipay.TradePagePay{}
 	p.NotifyURL = "http://220.112.233.229:3000/alipay"
 	p.ReturnURL = "http://220.112.233.229:3000"
 	p.Subject = "修正了中文的 Bug"
-	p.OutTradeNo = "trade_no_20170623011121"
+	p.OutTradeNo = "trade_no_201706230111212"
 	p.TotalAmount = "10.00"
 	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
+
+	p.GoodsDetail = []*alipay.GoodsDetail{&alipay.GoodsDetail{
+		GoodsId:   "123",
+		GoodsName: "xxx",
+		Quantity:  1,
+		Price:     13,
+	}}
+
 	url, err := client.TradePagePay(p)
 	if err != nil {
 		t.Fatal(err)
@@ -37,9 +46,9 @@ func TestAliPay_TradePagePay(t *testing.T) {
 	t.Log(url)
 }
 
-func TestAliPay_TradePreCreate(t *testing.T) {
+func TestClient_TradePreCreate(t *testing.T) {
 	t.Log("========== TradePreCreate ==========")
-	var p = alipay.AliPayTradePreCreate{}
+	var p = alipay.TradePreCreate{}
 	p.OutTradeNo = "no_0001"
 	p.Subject = "测试订单"
 	p.TotalAmount = "10.10"
@@ -48,15 +57,15 @@ func TestAliPay_TradePreCreate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rsp.AliPayPreCreateResponse.Code != alipay.K_SUCCESS_CODE {
-		t.Fatal(rsp.AliPayPreCreateResponse.Msg, rsp.AliPayPreCreateResponse.SubMsg)
+	if rsp.Content.Code != alipay.CodeSuccess {
+		t.Fatal(rsp.Content.Msg, rsp.Content.SubMsg)
 	}
-	t.Log(rsp.AliPayPreCreateResponse.QRCode)
+	t.Log(rsp.Content.QRCode)
 }
 
-func TestAliPay_TradePay(t *testing.T) {
-	t.Log("========== TradePay ==========")
-	var p = alipay.AliPayTradePay{}
+func TestClient_TradePay(t *testing.T) {
+	t.Log("========== Trade ==========")
+	var p = alipay.TradePay{}
 	p.OutTradeNo = "no_000111"
 	p.Subject = "测试订单"
 	p.TotalAmount = "10.10"
@@ -67,20 +76,51 @@ func TestAliPay_TradePay(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rsp.AliPayTradePay.Code != alipay.K_SUCCESS_CODE {
-		t.Fatal(rsp.AliPayTradePay.Msg, rsp.AliPayTradePay.SubMsg)
+	if rsp.Content.Code != alipay.CodeSuccess {
+		t.Fatal(rsp.Content.Code, rsp.Content.Msg, rsp.Content.SubMsg)
 	}
-	t.Log(rsp.AliPayTradePay.Msg)
+	t.Log(rsp.Content.Msg)
 }
 
-func TestAliPay_TradeRefund(t *testing.T) {
+func TestClient_TradeQuery(t *testing.T) {
+	t.Log("TradeQuery")
+	var p = alipay.TradeQuery{}
+	p.OutTradeNo = "trade_no_20170623021124"
+	p.QueryOptions = []string{"TRADE_SETTLE_INFO"}
+
+	rsp, err := client.TradeQuery(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rsp.Content.Code != alipay.CodeSuccess {
+		t.Fatal(rsp.Content.Code, rsp.Content.Msg, rsp.Content.SubMsg)
+	}
+	t.Log(rsp.Content.Msg)
+}
+
+func TestClient_TradeRefund(t *testing.T) {
 	t.Log("========== TradeRefund ==========")
-	var p = alipay.AliPayTradeRefund{}
-	p.RefundAmount = "10"
-	p.OutTradeNo = "trade_no_20170623011121"
+	var p = alipay.TradeRefund{}
+	p.RefundAmount = "100"
+	p.OutTradeNo = "trade_no_20170623021124"
+	p.OutRequestNo = "111"
 	rsp, err := client.TradeRefund(p)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%v", rsp.AliPayTradeRefund)
+	t.Logf("%v", rsp.Content)
+}
+
+func TestClient_TradeFastPayRefundQuery(t *testing.T) {
+	t.Log("========== TradeFastPayRefundQuery ==========")
+	var p = alipay.TradeFastPayRefundQuery{}
+	p.OutTradeNo = "trade_no_20170623021124"
+	p.OutRequestNo = "11"
+	p.QueryOptions = []string{"refund_detail_item_list"}
+
+	rsp, err := client.TradeFastPayRefundQuery(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("%v", rsp.Content)
 }
