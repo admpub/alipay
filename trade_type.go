@@ -307,6 +307,7 @@ type TradeFastPayRefundQueryRsp struct {
 		RefundReason         string              `json:"refund_reason"`                     // 发起退款时，传入的退款原因
 		TotalAmount          string              `json:"total_amount"`                      // 发该笔退款所对应的交易的订单金额
 		RefundAmount         string              `json:"refund_amount"`                     // 本次退款请求，对应的退款金额
+		RefundStatus         string              `json:"refund_status"`                     // 退款状态。枚举值：REFUND_SUCCESS 退款处理成功； 未返回该字段表示退款请求未收到或者退款失败；
 		RefundDetailItemList []*RefundDetailItem `json:"refund_detail_item_list,omitempty"` // 本次退款使用的资金渠道；
 	} `json:"alipay_trade_fastpay_refund_query_response"`
 	Sign string `json:"sign"`
