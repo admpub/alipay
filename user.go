@@ -29,3 +29,9 @@ func (this *Client) AgreementUnsign(param AgreementUnsign) (result *AgreementUns
 	err = this.DoRequest("POST", param, &result)
 	return result, err
 }
+
+// AgreementExecutionPlanModify 周期性扣款协议执行计划修改接口 https://docs.open.alipay.com/api_2/alipay.user.agreement.executionplan.modify
+func (this *Client) AgreementExecutionPlanModify(param AgreementExecutionPlanModify) (result *AgreementExecutionPlanModifyRsp, err error) {
+	err = this.DoRequest("POST", param, &result)
+	return result, err
+}

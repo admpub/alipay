@@ -9,26 +9,27 @@ type Trade struct {
 	Subject     string `json:"subject"`      // 订单标题
 	OutTradeNo  string `json:"out_trade_no"` // 商户订单号，64个字符以内、可包含字母、数字、下划线；需保证在商户端不重复
 	TotalAmount string `json:"total_amount"` // 订单总金额，单位为元，精确到小数点后两位，取值范围[0.01,100000000]
-	ProductCode string `json:"product_code"` // 销售产品码，与支付宝签约的产品码名称。 注：目前仅支持FAST_INSTANT_TRADE_PAY
+	ProductCode string `json:"product_code"` // 销售产品码，与支付宝签约的产品码名称。 参考官方文档, App 支付时默认值为 QUICK_MSECURITY_PAY
 
 	Body               string `json:"body,omitempty"`                 // 订单描述
 	BusinessParams     string `json:"business_params,omitempty"`      // 商户传入业务信息，具体值要和支付宝约定，应用于安全，营销等参数直传场景，格式为json格式
 	DisablePayChannels string `json:"disable_pay_channels,omitempty"` // 禁用渠道，用户不可用指定渠道支付 当有多个渠道时用“,”分隔 注，与enable_pay_channels互斥
 	EnablePayChannels  string `json:"enable_pay_channels,omitempty"`  // 可用渠道，用户只能在指定渠道范围内支付  当有多个渠道时用“,”分隔 注，与disable_pay_channels互斥
 	//ExtUserInfo        string `json:"ext_user_info,omitempty"`        // 外部指定买家
-	ExtendParams     map[string]interface{} `json:"extend_params,omitempty"`     // 业务扩展参数，详见下面的“业务扩展参数说明”
-	GoodsType        string                 `json:"goods_type,omitempty"`        // 商品主类型：0—虚拟类商品，1—实物类商品 注：虚拟类商品不支持使用花呗渠道
-	InvoiceInfo      string                 `json:"invoice_info,omitempty"`      // 开票信息
-	PassbackParams   string                 `json:"passback_params,omitempty"`   // 公用回传参数，如果请求时传递了该参数，则返回给商户时会回传该参数。支付宝会在异步通知时将该参数原样返回。本参数必须进行UrlEncode之后才可以发送给支付宝
-	PromoParams      string                 `json:"promo_params,omitempty"`      // 优惠参数 注：仅与支付宝协商后可用
-	RoyaltyInfo      string                 `json:"royalty_info,omitempty"`      // 描述分账信息，json格式，详见分账参数说明
-	SellerId         string                 `json:"seller_id,omitempty"`         // 收款支付宝用户ID。 如果该值为空，则默认为商户签约账号对应的支付宝用户ID
-	SettleInfo       string                 `json:"settle_info,omitempty"`       // 描述结算信息，json格式，详见结算参数说明
-	SpecifiedChannel string                 `json:"specified_channel,omitempty"` // 指定渠道，目前仅支持传入pcredit  若由于用户原因渠道不可用，用户可选择是否用其他渠道支付。  注：该参数不可与花呗分期参数同时传入
-	StoreId          string                 `json:"store_id,omitempty"`          // 商户门店编号。该参数用于请求参数中以区分各门店，非必传项。
-	SubMerchant      string                 `json:"sub_merchant,omitempty"`      // 间连受理商户信息体，当前只对特殊银行机构特定场景下使用此字段
-	TimeoutExpress   string                 `json:"timeout_express,omitempty"`   // 该笔订单允许的最晚付款时间，逾期将关闭交易。取值范围：1m～15d。m-分钟，h-小时，d-天，1c-当天（1c-当天的情况下，无论交易何时创建，都在0点关闭）。 该参数数值不接受小数点， 如 1.5h，可转换为 90m。
-	TimeExpire       string                 `json:"time_expire,omitempty"`       // 该笔订单绝对超时时间，格式为yyyy-MM-dd HH:mm:ss
+	ExtendParams        map[string]interface{} `json:"extend_params,omitempty"`         // 业务扩展参数，详见下面的“业务扩展参数说明”
+	AgreementSignParams interface{}            `json:"agreement_sign_params,omitempty"` // 签约参数。如果希望在sdk中支付并签约，需要在这里传入签约信息。 周期扣款场景 product_code 为 CYCLE_PAY_AUTH 时必填。
+	GoodsType           string                 `json:"goods_type,omitempty"`            // 商品主类型：0—虚拟类商品，1—实物类商品 注：虚拟类商品不支持使用花呗渠道
+	InvoiceInfo         string                 `json:"invoice_info,omitempty"`          // 开票信息
+	PassbackParams      string                 `json:"passback_params,omitempty"`       // 公用回传参数，如果请求时传递了该参数，则返回给商户时会回传该参数。支付宝会在异步通知时将该参数原样返回。本参数必须进行UrlEncode之后才可以发送给支付宝
+	PromoParams         string                 `json:"promo_params,omitempty"`          // 优惠参数 注：仅与支付宝协商后可用
+	RoyaltyInfo         string                 `json:"royalty_info,omitempty"`          // 描述分账信息，json格式，详见分账参数说明
+	SellerId            string                 `json:"seller_id,omitempty"`             // 收款支付宝用户ID。 如果该值为空，则默认为商户签约账号对应的支付宝用户ID
+	SettleInfo          string                 `json:"settle_info,omitempty"`           // 描述结算信息，json格式，详见结算参数说明
+	SpecifiedChannel    string                 `json:"specified_channel,omitempty"`     // 指定渠道，目前仅支持传入pcredit  若由于用户原因渠道不可用，用户可选择是否用其他渠道支付。  注：该参数不可与花呗分期参数同时传入
+	StoreId             string                 `json:"store_id,omitempty"`              // 商户门店编号。该参数用于请求参数中以区分各门店，非必传项。
+	SubMerchant         string                 `json:"sub_merchant,omitempty"`          // 间连受理商户信息体，当前只对特殊银行机构特定场景下使用此字段
+	TimeoutExpress      string                 `json:"timeout_express,omitempty"`       // 该笔订单允许的最晚付款时间，逾期将关闭交易。取值范围：1m～15d。m-分钟，h-小时，d-天，1c-当天（1c-当天的情况下，无论交易何时创建，都在0点关闭）。 该参数数值不接受小数点， 如 1.5h，可转换为 90m。
+	TimeExpire          string                 `json:"time_expire,omitempty"`           // 该笔订单绝对超时时间，格式为yyyy-MM-dd HH:mm:ss
 }
 
 // TradePagePay 统一收单下单并支付页面接口请求参数 https://opendocs.alipay.com/apis/api_1/alipay.trade.page.pay
@@ -273,6 +274,7 @@ type RefundDetailItem struct {
 	FundChannel string `json:"fund_channel"` // 交易使用的资金渠道，详见 支付渠道列表
 	Amount      string `json:"amount"`       // 该支付工具类型所使用的金额
 	RealAmount  string `json:"real_amount"`  // 渠道实际付款金额
+	FundType    string `json:"fund_type"`    // 渠道所使用的资金类型
 }
 
 // TradeFastPayRefundQuery 统一收单交易退款查询接口请求参数 https://docs.open.alipay.com/api_1/alipay.trade.fastpay.refund.query
@@ -307,8 +309,12 @@ type TradeFastPayRefundQueryRsp struct {
 		RefundReason         string              `json:"refund_reason"`                     // 发起退款时，传入的退款原因
 		TotalAmount          string              `json:"total_amount"`                      // 发该笔退款所对应的交易的订单金额
 		RefundAmount         string              `json:"refund_amount"`                     // 本次退款请求，对应的退款金额
-		RefundStatus         string              `json:"refund_status"`                     // 退款状态。枚举值：REFUND_SUCCESS 退款处理成功； 未返回该字段表示退款请求未收到或者退款失败；
+		RefundStatus         string              `json:"refund_status"`                     // 退款状态。枚举值： REFUND_SUCCESS 退款处理成功； 未返回该字段表示退款请求未收到或者退款失败；
+		RefundRoyaltys       []*RefundRoyalty    `json:"refund_royaltys"`                   // 退分账明细信息
+		GMTRefundPay         string              `json:"gmt_refund_pay"`                    // 退款时间。
 		RefundDetailItemList []*RefundDetailItem `json:"refund_detail_item_list,omitempty"` // 本次退款使用的资金渠道；
+		SendBackFee          string              `json:"send_back_fee"`                     // 本次商户实际退回金额；
+		DepositBackInfo      []*DepositBackInfo  `json:"deposit_back_info"`                 // 银行卡冲退信息
 	} `json:"alipay_trade_fastpay_refund_query_response"`
 	Sign string `json:"sign"`
 }
@@ -318,6 +324,24 @@ func (this *TradeFastPayRefundQueryRsp) IsSuccess() bool {
 		return true
 	}
 	return false
+}
+
+type RefundRoyalty struct {
+	RefundAmount  string `json:"refund_amount"`
+	RoyaltyType   string `json:"royalty_type"`
+	ResultCode    string `json:"result_code"`
+	TransOut      string `json:"trans_out"`
+	TransOutEmail string `json:"trans_out_email"`
+	TransIn       string `json:"trans_in"`
+	TransInEmail  string `json:"trans_in_email"`
+}
+
+type DepositBackInfo struct {
+	HasDepositBack     string `json:"has_deposit_back"`
+	DBackStatus        string `json:"dback_status"`
+	DBackAmount        string `json:"dback_amount"`
+	BankAckTime        string `json:"bank_ack_time"`
+	ESTBankReceiptTime string `json:"est_bank_receipt_time"`
 }
 
 // TradeOrderSettle 统一收单交易结算接口请求参数 https://docs.open.alipay.com/api_1/alipay.trade.order.settle
