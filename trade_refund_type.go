@@ -2,6 +2,7 @@ package alipay
 
 // TradeRefundAsync 统一收单交易退款接口(异步)请求参数 https://opendocs.alipay.com/pre-apis/api_pre/alipay.trade.refund.apply
 type TradeRefundAsync struct {
+	AuxParam
 	AppAuthToken string `json:"-"`                      // 可选
 	NotifyURL    string `json:"-"`                      // 可选
 	OutTradeNo   string `json:"out_trade_no,omitempty"` // 与 TradeNo 二选一
@@ -27,20 +28,10 @@ func (this TradeRefundAsync) Params() map[string]string {
 
 // TradeRefundAsyncRsp 统一收单交易退款接口(异步)响应参数
 type TradeRefundAsyncRsp struct {
-	Content struct {
-		Code         Code   `json:"code"`
-		Msg          string `json:"msg"`
-		SubCode      string `json:"sub_code"`
-		SubMsg       string `json:"sub_msg"`
-		TradeNo      string `json:"trade_no"`       // 支付宝交易号
-		OutTradeNo   string `json:"out_trade_no"`   // 商户订单号
-		OutRequestNo string `json:"out_request_no"` // 本笔退款对应的退款请求号
-		RefundAmount string `json:"refund_amount"`  // 本次退款请求，对应的退款金额
-		RefundStatus string `json:"refund_status"`  // REFUND_PROCESSING 退款处理中；REFUND_SUCCESS 退款处理成功；REFUND_FAIL 退款失败
-	} `json:"alipay_trade_refund_apply_response"`
-	Sign string `json:"sign"`
-}
-
-func (this *TradeRefundAsyncRsp) IsSuccess() bool {
-	return this.Content.Code == CodeSuccess
+	Error
+	TradeNo      string `json:"trade_no"`       // 支付宝交易号
+	OutTradeNo   string `json:"out_trade_no"`   // 商户订单号
+	OutRequestNo string `json:"out_request_no"` // 本笔退款对应的退款请求号
+	RefundAmount string `json:"refund_amount"`  // 本次退款请求，对应的退款金额
+	RefundStatus string `json:"refund_status"`  // REFUND_PROCESSING 退款处理中；REFUND_SUCCESS 退款处理成功；REFUND_FAIL 退款失败
 }

@@ -15,7 +15,7 @@ func (this *Client) UserCertifyOpenCertify(param UserCertifyOpenCertify) (result
 		return nil, err
 	}
 
-	result, err = url.Parse(this.apiDomain + "?" + p.Encode())
+	result, err = url.Parse(this.host + "?" + p.Encode())
 	if err != nil {
 		return nil, err
 	}
@@ -29,14 +29,14 @@ func (this *Client) UserCertifyOpenQuery(param UserCertifyOpenQuery) (result *Us
 	return result, err
 }
 
-// UserCertdocCertverifyPreconsult 实名证件信息比对验证预咨询 https://opendocs.alipay.com/apis/api_2/alipay.user.certdoc.certverify.preconsult
-func (this *Client) UserCertdocCertverifyPreconsult(param UserCertdocCertverifyPreconsult) (result *UserCertdocCertverifyPreconsultRsp, err error) {
+// UserCertDocCertVerifyPreConsult 实名证件信息比对验证预咨询 https://opendocs.alipay.com/apis/api_2/alipay.user.certdoc.certverify.preconsult
+func (this *Client) UserCertDocCertVerifyPreConsult(param UserCertDocCertVerifyPreConsult) (result *UserCertDocCertVerifyPreConsultRsp, err error) {
 	err = this.doRequest("POST", param, &result)
 	return result, err
 }
 
-// UserCertdocCertverifyConsult 实名证件信息比对验证咨询 https://opendocs.alipay.com/apis/api_2/alipay.user.certdoc.certverify.consult
-func (this *Client) UserCertdocCertverifyConsult(param UserCertdocCertverifyConsult) (result *UserCertdocCertverifyConsultRsp, err error) {
+// UserCertDocCertVerifyConsult 实名证件信息比对验证咨询 https://opendocs.alipay.com/apis/api_2/alipay.user.certdoc.certverify.consult
+func (this *Client) UserCertDocCertVerifyConsult(param UserCertDocCertVerifyConsult) (result *UserCertDocCertVerifyConsultRsp, err error) {
 	err = this.doRequest("POST", param, &result)
 	return result, err
 }

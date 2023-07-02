@@ -21,10 +21,11 @@ func TestClient_SystemOauthToken(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rsp.Content.Code != alipay.CodeSuccess {
-		t.Fatal(rsp.Content.Msg, rsp.Content.SubMsg)
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Msg, rsp.SubMsg)
 	}
-	t.Log(rsp.Content.UserId, rsp.Content.AccessToken)
+	t.Logf("%v", rsp)
 }
 
 func TestClient_UserInfoShare(t *testing.T) {
@@ -35,15 +36,16 @@ func TestClient_UserInfoShare(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rsp.Content.Code != alipay.CodeSuccess {
-		t.Fatal(rsp.Content.Msg, rsp.Content.SubMsg)
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Msg, rsp.SubMsg)
 	}
-	t.Log(rsp.Content.UserId)
+	t.Logf("%v", rsp)
 }
 
 func TestClient_AppToAppAuth(t *testing.T) {
 	t.Log("========== AppToAppAuth ==========")
-	var result, err = client.AppToAppAuth("http://127.0.0.1")
+	var result, err = client.AppToAppAuth("http://127.0.0.1", "")
 	t.Log(result, err)
 }
 
@@ -56,13 +58,11 @@ func TestClient_OpenAuthTokenApp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rsp.Content.Code != alipay.CodeSuccess {
-		t.Fatal(rsp.Content.Msg)
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Msg, rsp.SubMsg)
 	}
-	tokens := rsp.Content.Tokens
-	for _, token := range tokens {
-		t.Log(token.AppAuthToken, token.UserId)
-	}
+	t.Logf("%v", rsp)
 }
 
 func TestClient_AccountAuth(t *testing.T) {
@@ -76,6 +76,16 @@ func TestClient_AccountAuth(t *testing.T) {
 		t.Fatal(err)
 	}
 	if result == "" {
+		t.Fatal(err)
+	}
+	t.Log(result)
+}
+
+func TestClient_OpenAuthAppAuthInviteCreate(t *testing.T) {
+	t.Log("========== OpenAuthAppAuthInviteCreate ==========")
+	var p = alipay.OpenAuthAppAuthInviteCreate{}
+	result, err := client.OpenAuthAppAuthInviteCreate(p)
+	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(result)

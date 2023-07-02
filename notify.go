@@ -3,50 +3,31 @@ package alipay
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 var (
 	kSuccess = []byte("success")
 )
 
-func NewRequest(method, url string, params url.Values) (*http.Request, error) {
-	var m = strings.ToUpper(method)
-	var body io.Reader
-	if m == "GET" || m == "HEAD" {
-		if len(params) > 0 {
-			if strings.Contains(url, "?") {
-				url = url + "&" + params.Encode()
-			} else {
-				url = url + "?" + params.Encode()
-			}
-		}
-	} else {
-		body = strings.NewReader(params.Encode())
-	}
-	return http.NewRequest(m, url, body)
-}
-
 func (this *Client) NotifyVerify(partnerId, notifyId string) bool {
-	var param = url.Values{}
-	param.Add("service", "notify_verify")
-	param.Add("partner", partnerId)
-	param.Add("notify_id", notifyId)
-	req, err := NewRequest("GET", this.notifyVerifyDomain, param)
+	var values = url.Values{}
+	values.Add("service", "notify_verify")
+	values.Add("partner", partnerId)
+	values.Add("notify_id", notifyId)
+	req, err := http.NewRequest(http.MethodGet, this.notifyVerifyHost+"?"+values.Encode(), nil)
 	if err != nil {
 		return false
 	}
 
-	rep, err := this.Client.Do(req)
+	rsp, err := this.Client.Do(req)
 	if err != nil {
 		return false
 	}
-	defer rep.Body.Close()
+	defer rsp.Body.Close()
 
-	data, err := ioutil.ReadAll(rep.Body)
+	data, err := io.ReadAll(rsp.Body)
 	if err != nil {
 		return false
 	}
@@ -56,66 +37,81 @@ func (this *Client) NotifyVerify(partnerId, notifyId string) bool {
 	return false
 }
 
-func (this *Client) GetTradeNotification(req *http.Request) (noti *TradeNotification, err error) {
+// GetTradeNotification
+// Deprecated: use DecodeNotification instead.
+func (this *Client) GetTradeNotification(req *http.Request) (notification *Notification, err error) {
 	if req == nil {
 		return nil, errors.New("request 参数不能为空")
 	}
 	if err = req.ParseForm(); err != nil {
 		return nil, err
 	}
-
-	noti = &TradeNotification{}
-	noti.AppId = req.FormValue("app_id")
-	noti.AuthAppId = req.FormValue("auth_app_id")
-	noti.NotifyId = req.FormValue("notify_id")
-	noti.NotifyType = req.FormValue("notify_type")
-	noti.NotifyTime = req.FormValue("notify_time")
-	noti.TradeNo = req.FormValue("trade_no")
-	noti.TradeStatus = TradeStatus(req.FormValue("trade_status"))
-	noti.TotalAmount = req.FormValue("total_amount")
-	noti.ReceiptAmount = req.FormValue("receipt_amount")
-	noti.InvoiceAmount = req.FormValue("invoice_amount")
-	noti.BuyerPayAmount = req.FormValue("buyer_pay_amount")
-	noti.SellerId = req.FormValue("seller_id")
-	noti.SellerEmail = req.FormValue("seller_email")
-	noti.BuyerId = req.FormValue("buyer_id")
-	noti.BuyerLogonId = req.FormValue("buyer_logon_id")
-	noti.FundBillList = req.FormValue("fund_bill_list")
-	noti.Charset = req.FormValue("charset")
-	noti.PointAmount = req.FormValue("point_amount")
-	noti.OutTradeNo = req.FormValue("out_trade_no")
-	noti.OutBizNo = req.FormValue("out_biz_no")
-	noti.GmtCreate = req.FormValue("gmt_create")
-	noti.GmtPayment = req.FormValue("gmt_payment")
-	noti.GmtRefund = req.FormValue("gmt_refund")
-	noti.GmtClose = req.FormValue("gmt_close")
-	noti.Subject = req.FormValue("subject")
-	noti.Body = req.FormValue("body")
-	noti.RefundFee = req.FormValue("refund_fee")
-	noti.Version = req.FormValue("version")
-	noti.SignType = req.FormValue("sign_type")
-	noti.Sign = req.FormValue("sign")
-	noti.PassbackParams = req.FormValue("passback_params")
-	noti.VoucherDetailList = req.FormValue("voucher_detail_list")
-	noti.AgreementNo = req.FormValue("agreement_no")
-	noti.ExternalAgreementNo = req.FormValue("external_agreement_no")
-
-	//if len(noti.NotifyId) == 0 {
-	//	return nil, errors.New("不是有效的 Notify")
-	//}
-
-	ok, err := this.VerifySign(req.Form)
-	if ok == false {
-		return nil, err
-	}
-	return noti, err
+	return this.DecodeNotification(req.Form)
 }
 
+func (this *Client) DecodeNotification(values url.Values) (notification *Notification, err error) {
+	if err = this.VerifySign(values); err != nil {
+		return nil, err
+	}
+
+	notification = &Notification{}
+	notification.AppId = values.Get("app_id")
+	notification.AuthAppId = values.Get("auth_app_id")
+	notification.NotifyId = values.Get("notify_id")
+	notification.NotifyType = values.Get("notify_type")
+	notification.NotifyTime = values.Get("notify_time")
+	notification.TradeNo = values.Get("trade_no")
+	notification.TradeStatus = TradeStatus(values.Get("trade_status"))
+	notification.TotalAmount = values.Get("total_amount")
+	notification.ReceiptAmount = values.Get("receipt_amount")
+	notification.InvoiceAmount = values.Get("invoice_amount")
+	notification.BuyerPayAmount = values.Get("buyer_pay_amount")
+	notification.SellerId = values.Get("seller_id")
+	notification.SellerEmail = values.Get("seller_email")
+	notification.BuyerId = values.Get("buyer_id")
+	notification.BuyerLogonId = values.Get("buyer_logon_id")
+	notification.FundBillList = values.Get("fund_bill_list")
+	notification.Charset = values.Get("charset")
+	notification.PointAmount = values.Get("point_amount")
+	notification.OutTradeNo = values.Get("out_trade_no")
+	notification.OutBizNo = values.Get("out_biz_no")
+	notification.GmtCreate = values.Get("gmt_create")
+	notification.GmtPayment = values.Get("gmt_payment")
+	notification.GmtRefund = values.Get("gmt_refund")
+	notification.GmtClose = values.Get("gmt_close")
+	notification.Subject = values.Get("subject")
+	notification.Body = values.Get("body")
+	notification.RefundFee = values.Get("refund_fee")
+	notification.Version = values.Get("version")
+	notification.SignType = values.Get("sign_type")
+	notification.Sign = values.Get("sign")
+	notification.PassbackParams = values.Get("passback_params")
+	notification.VoucherDetailList = values.Get("voucher_detail_list")
+	notification.AgreementNo = values.Get("agreement_no")
+	notification.ExternalAgreementNo = values.Get("external_agreement_no")
+	return notification, err
+}
+
+// AckNotification
+// Deprecated: use ACKNotification instead.
 func (this *Client) AckNotification(w http.ResponseWriter) {
 	AckNotification(w)
 }
 
+// ACKNotification 返回异步通知成功处理的消息给支付宝
+func (this *Client) ACKNotification(w http.ResponseWriter) {
+	ACKNotification(w)
+}
+
+// AckNotification
+// Deprecated: use ACKNotification instead.
 func AckNotification(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusOK)
+	w.Write(kSuccess)
+}
+
+// ACKNotification 返回异步通知成功处理的消息给支付宝
+func ACKNotification(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(kSuccess)
 }

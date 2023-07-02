@@ -11,6 +11,7 @@ const (
 
 // UserCertifyOpenInitialize 身份认证初始化服务接口请求参数 https://docs.open.alipay.com/api_2/alipay.user.certify.open.initialize
 type UserCertifyOpenInitialize struct {
+	AuxParam
 	AppAuthToken        string         `json:"-"`                               // 可选
 	OuterOrderNo        string         `json:"outer_order_no"`                  // 必选  商户请求的唯一标识，商户要保证其唯一性，值为32位长度的字母数字组合。建议：前面几位字符是商户自定义的简称，中间可以使用一段时间，后段可以使用一个随机或递增序列
 	BizCode             CertifyBizCode `json:"biz_code"`                        // 必选 认证场景码。入参支持的认证场景码和商户签约的认证场景相关，取值如下: FACE：多因子人脸认证 CERT_PHOTO：多因子证照认证 CERT_PHOTO_FACE ：多因子证照和人脸认证 SMART_FACE：多因子快捷认证
@@ -42,18 +43,13 @@ func (this UserCertifyOpenInitialize) Params() map[string]string {
 
 // UserCertifyOpenInitializeRsp 身份认证初始化服务接口响应参数
 type UserCertifyOpenInitializeRsp struct {
-	Content struct {
-		Code      Code   `json:"code"`
-		Msg       string `json:"msg"`
-		SubCode   string `json:"sub_code"`
-		SubMsg    string `json:"sub_msg"`
-		CertifyId string `json:"certify_id"`
-	} `json:"alipay_user_certify_open_initialize_response"`
-	Sign string `json:"sign"`
+	Error
+	CertifyId string `json:"certify_id"`
 }
 
 // UserCertifyOpenCertify 身份认证开始认证接口请求参数 https://docs.open.alipay.com/api_2/alipay.user.certify.open.certify
 type UserCertifyOpenCertify struct {
+	AuxParam
 	AppAuthToken string `json:"-"`          // 可选
 	CertifyId    string `json:"certify_id"` // 必选 本次申请操作的唯一标识，由开放认证初始化接口调用后生成，后续的操作都需要用到
 }
@@ -70,17 +66,12 @@ func (this UserCertifyOpenCertify) Params() map[string]string {
 
 // UserCertifyOpenCertifyRsp 身份认证开始认证接口响应参数
 type UserCertifyOpenCertifyRsp struct {
-	Content struct {
-		Code    Code   `json:"code"`
-		Msg     string `json:"msg"`
-		SubCode string `json:"sub_code"`
-		SubMsg  string `json:"sub_msg"`
-	} `json:"alipay_user_certify_open_certify_response"`
-	Sign string `json:"sign"`
+	Error
 }
 
 // UserCertifyOpenQuery 身份认证记录查询接口请求参数 https://docs.open.alipay.com/api_2/alipay.user.certify.open.query/
 type UserCertifyOpenQuery struct {
+	AuxParam
 	AppAuthToken string `json:"-"`          // 可选
 	CertifyId    string `json:"certify_id"` // 必选 本次申请操作的唯一标识，由开放认证初始化接口调用后生成，后续的操作都需要用到
 }
@@ -97,20 +88,15 @@ func (this UserCertifyOpenQuery) Params() map[string]string {
 
 // UserCertifyOpenQueryRsp 身份认证记录查询接口响应参数
 type UserCertifyOpenQueryRsp struct {
-	Content struct {
-		Code         Code   `json:"code"`
-		Msg          string `json:"msg"`
-		SubCode      string `json:"sub_code"`
-		SubMsg       string `json:"sub_msg"`
-		Passed       string `json:"passed"`
-		IdentityInfo string `json:"identity_info"`
-		MaterialInfo string `json:"material_info"`
-	} `json:"alipay_user_certify_open_query_response"`
-	Sign string `json:"sign"`
+	Error
+	Passed       string `json:"passed"`
+	IdentityInfo string `json:"identity_info"`
+	MaterialInfo string `json:"material_info"`
 }
 
-// UserCertdocCertverifyPreconsult 实名证件信息比对验证预咨询接口请求参数 https://opendocs.alipay.com/apis/api_2/alipay.user.certdoc.certverify.preconsult
-type UserCertdocCertverifyPreconsult struct {
+// UserCertDocCertVerifyPreConsult 实名证件信息比对验证预咨询接口请求参数 https://opendocs.alipay.com/apis/api_2/alipay.user.certdoc.certverify.preconsult
+type UserCertDocCertVerifyPreConsult struct {
+	AuxParam
 	AppAuthToken string                 `json:"-"`         // 可选
 	UserName     string                 `json:"user_name"` // 真实姓名
 	CertType     string                 `json:"cert_type"` // 证件类型。暂仅支持 IDENTITY_CARD （身份证）。	ID
@@ -120,54 +106,43 @@ type UserCertdocCertverifyPreconsult struct {
 	ExtInfo      map[string]interface{} `json:"ext_info"`  // 拓展字段,JSON格式 可选
 }
 
-func (this UserCertdocCertverifyPreconsult) APIName() string {
+func (this UserCertDocCertVerifyPreConsult) APIName() string {
 	return "alipay.user.certdoc.certverify.preconsult"
 }
 
-func (this UserCertdocCertverifyPreconsult) Params() map[string]string {
+func (this UserCertDocCertVerifyPreConsult) Params() map[string]string {
 	var m = make(map[string]string)
 	m["app_auth_token"] = this.AppAuthToken
 	return m
 }
 
-// UserCertdocCertverifyPreconsultRsp 实名证件信息比对验证预咨询接口响应参数
-type UserCertdocCertverifyPreconsultRsp struct {
-	Content struct {
-		Code     Code   `json:"code"`
-		Msg      string `json:"msg"`
-		SubCode  string `json:"sub_code"`
-		SubMsg   string `json:"sub_msg"`
-		VerifyId string `json:"verify_id"`
-	} `json:"alipay_user_certdoc_certverify_preconsult_response"`
-	Sign string `json:"sign"`
+// UserCertDocCertVerifyPreConsultRsp 实名证件信息比对验证预咨询接口响应参数
+type UserCertDocCertVerifyPreConsultRsp struct {
+	Error
+	VerifyId string `json:"verify_id"`
 }
 
-// UserCertdocCertverifyConsult 实名证件信息比对验证咨询接口请求参数 https://opendocs.alipay.com/apis/api_2/alipay.user.certdoc.certverify.consult
-type UserCertdocCertverifyConsult struct {
+// UserCertDocCertVerifyConsult 实名证件信息比对验证咨询接口请求参数 https://opendocs.alipay.com/apis/api_2/alipay.user.certdoc.certverify.consult
+type UserCertDocCertVerifyConsult struct {
+	AuxParam
 	AppAuthToken string `json:"-"`         // 可选
 	VerifyId     string `json:"verify_id"` // 信息校验验证ID。通过alipay.user.certdoc.certverify.preconsult(实名证件信息比对验证预咨询)接口获取
 }
 
-func (this UserCertdocCertverifyConsult) APIName() string {
+func (this UserCertDocCertVerifyConsult) APIName() string {
 	return "alipay.user.certdoc.certverify.consult"
 }
 
-func (this UserCertdocCertverifyConsult) Params() map[string]string {
+func (this UserCertDocCertVerifyConsult) Params() map[string]string {
 	var m = make(map[string]string)
 	m["app_auth_token"] = this.AppAuthToken
 	return m
 }
 
-// UserCertdocCertverifyConsultRsp 实名证件信息比对验证咨询接口响应参数
-type UserCertdocCertverifyConsultRsp struct {
-	Content struct {
-		Code       Code   `json:"code"`
-		Msg        string `json:"msg"`
-		SubCode    string `json:"sub_code"`
-		SubMsg     string `json:"sub_msg"`
-		Passed     string `json:"passed"`
-		FailReason string `json:"fail_reason"`
-		FailParams string `json:"fail_params"`
-	} `json:"alipay_user_certdoc_certverify_consult_response"`
-	Sign string `json:"sign"`
+// UserCertDocCertVerifyConsultRsp 实名证件信息比对验证咨询接口响应参数
+type UserCertDocCertVerifyConsultRsp struct {
+	Error
+	Passed     string `json:"passed"`
+	FailReason string `json:"fail_reason"`
+	FailParams string `json:"fail_params"`
 }

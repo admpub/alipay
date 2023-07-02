@@ -17,7 +17,7 @@ func TestClient_TradeAppPay(t *testing.T) {
 	p.ProductCode = "p_1010101"
 	param, err := client.TradeAppPay(p)
 	if err != nil {
-		t.FailNow()
+		t.Fatal(err)
 	}
 	t.Log(param)
 }
@@ -57,10 +57,11 @@ func TestClient_TradePreCreate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rsp.Content.Code != alipay.CodeSuccess {
-		t.Fatal(rsp.Content.Msg, rsp.Content.SubMsg)
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Msg, rsp.SubMsg)
 	}
-	t.Log(rsp.Content.QRCode)
+	t.Logf("%v", rsp)
 }
 
 func TestClient_TradePay(t *testing.T) {
@@ -76,14 +77,15 @@ func TestClient_TradePay(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rsp.Content.Code != alipay.CodeSuccess {
-		t.Fatal(rsp.Content.Code, rsp.Content.Msg, rsp.Content.SubMsg)
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Msg, rsp.SubMsg)
 	}
-	t.Log(rsp.Content.Msg)
+	t.Logf("%v", rsp)
 }
 
 func TestClient_TradeQuery(t *testing.T) {
-	t.Log("TradeQuery")
+	t.Log("========== TradeQuery ==========")
 	var p = alipay.TradeQuery{}
 	p.OutTradeNo = "trade_no_20170623021124"
 	p.QueryOptions = []string{"TRADE_SETTLE_INFO"}
@@ -92,10 +94,46 @@ func TestClient_TradeQuery(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rsp.Content.Code != alipay.CodeSuccess {
-		t.Fatal(rsp.Content.Code, rsp.Content.Msg, rsp.Content.SubMsg)
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Code, rsp.Msg, rsp.SubMsg)
 	}
-	t.Log(rsp.Content.Msg)
+	t.Logf("%v", rsp)
+}
+
+func TestClient_TradeQuery2(t *testing.T) {
+	t.Log("========== TradeQuery ==========")
+	var p = alipay.NewPayload("alipay.trade.query")
+	p.AddBizField("out_trade_no", "trade_no_20170623021124")
+	p.AddBizField("query_options", []string{"TRADE_SETTLE_INFO"})
+
+	var rsp *alipay.TradeQueryRsp
+	var err = client.Request(p, &rsp)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Code, rsp.Msg, rsp.SubMsg)
+	}
+	t.Logf("%v", rsp)
+}
+
+func TestClient_TradeQuery3(t *testing.T) {
+	t.Log("========== TradeQuery ==========")
+	var p = alipay.NewPayload("alipay.trade.query")
+	p.AddBizField("out_trade_no", "trade_no_20170623021124")
+	p.AddBizField("query_options", []string{"TRADE_SETTLE_INFO"})
+
+	var rsp map[string]interface{}
+	var err = client.Request(p, &rsp)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("%v", rsp)
 }
 
 func TestClient_TradeRefund(t *testing.T) {
@@ -108,7 +146,11 @@ func TestClient_TradeRefund(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%v", rsp.Content)
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Msg, rsp.SubMsg)
+	}
+	t.Logf("%v", rsp)
 }
 
 func TestClient_TradeFastPayRefundQuery(t *testing.T) {
@@ -122,7 +164,11 @@ func TestClient_TradeFastPayRefundQuery(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%v", rsp.Content)
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Msg, rsp.SubMsg)
+	}
+	t.Logf("%v", rsp)
 }
 
 func TestClient_TradeRefundAsync(t *testing.T) {
@@ -138,5 +184,24 @@ func TestClient_TradeRefundAsync(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%v", rsp.Content)
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Msg, rsp.SubMsg)
+	}
+	t.Logf("%v", rsp)
+}
+
+func TestClient_TradeMergePreCreate(t *testing.T) {
+	t.Log("========== TradeMergePreCreate ==========")
+	var p = alipay.TradeMergePreCreate{}
+
+	rsp, err := client.TradeMergePreCreate(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rsp.IsFailure() {
+		t.Fatal(rsp.Msg, rsp.SubMsg)
+	}
+	t.Logf("%v", rsp)
 }
