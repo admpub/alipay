@@ -32,6 +32,8 @@ var (
 const (
 	kAliPayPublicKeySN = "alipay-public-key"
 	kAppAuthToken      = "app_auth_token"
+	kReturnURL         = "return_url"
+	kNotifyURL         = "notify_url"
 	kEmptyBizContent   = "{}"
 )
 
@@ -191,14 +193,14 @@ func (this *Client) loadVerifier(sn string, pub *rsa.PublicKey) Verifier {
 }
 
 // LoadAliPayPublicKey 加载支付宝公钥
-func (this *Client) LoadAliPayPublicKey(aliPublicKey string) error {
+func (this *Client) LoadAliPayPublicKey(s string) error {
 	var pub *rsa.PublicKey
 	var err error
-	if len(aliPublicKey) < 0 {
+	if len(s) < 0 {
 		return ErrAliPublicKeyNotFound
 	}
 
-	pub, err = ncrypto.DecodePublicKey([]byte(aliPublicKey)).PKIX().RSAPublicKey()
+	pub, err = ncrypto.DecodePublicKey([]byte(s)).PKIX().RSAPublicKey()
 	if err != nil {
 		return err
 	}
@@ -355,7 +357,7 @@ func (this *Client) URLValues(param Param) (value url.Values, err error) {
 
 	var params = param.Params()
 	for k, v := range params {
-		if k == kAppAuthToken && v == "" {
+		if v == "" {
 			continue
 		}
 		values.Add(k, v)
@@ -379,12 +381,8 @@ func (this *Client) doRequest(method string, param Param, result interface{}) (e
 		if err != nil {
 			return err
 		}
-		req.SetParams(values)
-
-		var files = param.FileParams()
-		for _, file := range files {
-			req.AddFile(file.Name, file.Filename, file.Filepath)
-		}
+		req.SetForm(values)
+		req.SetFileForm(param.FileParams())
 	}
 
 	rsp, err := req.Do(context.Background())

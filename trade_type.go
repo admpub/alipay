@@ -40,6 +40,7 @@ type Trade struct {
 }
 
 type SignParams struct {
+	ProductCode         string             `json:"product_code"`                 // 必选 商家和支付宝签约的产品码。 商家扣款产品传入固定值：GENERAL_WITHHOLDING
 	PersonalProductCode string             `json:"personal_product_code"`        // 必选 个人签约产品码，商户和支付宝签约时确定。
 	SignScene           string             `json:"sign_scene"`                   // 必选 协议签约场景，商户和支付宝签约时确定，商户可咨询技术支持。
 	ExternalAgreementNo string             `json:"external_agreement_no"`        // 可选 商户签约号，代扣协议中标示用户的唯一签约号（确保在商户系统中唯一）。 格式规则：支持大写小写字母和数字，最长32位。 商户系统按需传入，如果同一用户在同一产品码、同一签约场景下，签订了多份代扣协议，那么需要指定并传入该值。
@@ -426,6 +427,7 @@ type TradeCreate struct {
 	Trade
 	DiscountableAmount string             `json:"discountable_amount"` // 可打折金额. 参与优惠计算的金额，单位为元，精确到小数点后两位
 	BuyerId            string             `json:"buyer_id"`
+	BuyerOpenId        string             `json:"buyer_open_id"` // 新版接口无法获取user_id, 这里只能传递openid值
 	GoodsDetail        []*GoodsDetailItem `json:"goods_detail,omitempty"`
 	OperatorId         string             `json:"operator_id"`
 	TerminalId         string             `json:"terminal_id"`
@@ -553,6 +555,10 @@ func (this TradeAppPay) Params() map[string]string {
 	m["app_auth_token"] = this.AppAuthToken
 	m["notify_url"] = this.NotifyURL
 	return m
+}
+
+func (this TradeAppPay) NeedEncrypt() bool {
+	return false
 }
 
 // TradePreCreate 统一收单线下交易预创建接口请求参数 https://docs.open.alipay.com/api_1/alipay.trade.precreate/
@@ -687,6 +693,7 @@ type ExtendParams struct {
 	IndustryRefluxInfo   string `json:"industry_reflux_info"`    // 可选 行业数据回流信息, 详见：地铁支付接口参数补充说明
 	CardType             string `json:"card_type"`               // 可选 卡类型
 	SpecifiedSellerName  string `json:"specified_seller_name"`   // 可选 特殊场景下，允许商户指定交易展示的卖家名称
+	OrigTotalAmount      string `json:"orig_total_amount"`       // 可选 外部订单金额。
 }
 
 type Merchant struct {
