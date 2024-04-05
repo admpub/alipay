@@ -46,6 +46,7 @@ type SystemOauthTokenRsp struct {
 	ReExpiresIn  int64  `json:"re_expires_in"`
 	AuthStart    string `json:"auth_start"`
 	OpenId       string `json:"open_id"`
+	UnionId      string `json:"union_id"`
 }
 
 func (s *SystemOauthTokenRsp) IsSuccess() bool {
@@ -88,6 +89,10 @@ type UserInfoShareRsp struct {
 	UserStatus         string `json:"user_status"`
 	IsCertified        string `json:"is_certified"`
 	Gender             string `json:"gender"`
+	Username           string `json:"user_name"` //https://open.alipay.com/portal/forum/post/59001014?ant_source=opendoc_recommend
+	CertNo             string `json:"cert_no"`
+	CertType           string `json:"cert_type"`
+	Mobile             string `json:"mobile"`
 }
 
 // OpenAuthTokenApp 换取应用授权令牌请求参数 https://docs.open.alipay.com/api_9/alipay.open.auth.token.app
