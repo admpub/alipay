@@ -2,8 +2,9 @@ package alipay_test
 
 import (
 	"context"
-	"github.com/smartwalle/alipay/v3"
 	"testing"
+
+	"github.com/admpub/alipay/v3"
 )
 
 func TestClient_SecurityRiskComplaintInfoBatchQuery(t *testing.T) {
