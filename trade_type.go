@@ -27,19 +27,30 @@ type Trade struct {
 	ExtendParams        *ExtendParams `json:"extend_params,omitempty"`         // 可选 业务扩展参数，详见下面的“业务扩展参数说明”
 	AgreementSignParams *SignParams   `json:"agreement_sign_params,omitempty"` // 签约参数。如果希望在sdk中支付并签约，需要在这里传入签约信息。 周期扣款场景 product_code 为 CYCLE_PAY_AUTH 时必填。
 	GoodsType           string        `json:"goods_type,omitempty"`            // 商品主类型：0—虚拟类商品，1—实物类商品 注：虚拟类商品不支持使用花呗渠道
-	InvoiceInfo         string        `json:"invoice_info,omitempty"`          // 开票信息
+	InvoiceInfo         *InvoiceInfo  `json:"invoice_info,omitempty"`          // 开票信息
 	PassbackParams      string        `json:"passback_params,omitempty"`       // 公用回传参数，如果请求时传递了该参数，则返回给商户时会回传该参数。支付宝会在异步通知时将该参数原样返回。本参数必须进行UrlEncode之后才可以发送给支付宝
 	PromoParams         string        `json:"promo_params,omitempty"`          // 优惠参数 注：仅与支付宝协商后可用
-	RoyaltyInfo         string        `json:"royalty_info,omitempty"`          // 描述分账信息，json格式，详见分账参数说明
+	RoyaltyInfo         *RoyaltyInfo  `json:"royalty_info,omitempty"`          // 描述分账信息，json格式，详见分账参数说明
 	SellerId            string        `json:"seller_id,omitempty"`             // 收款支付宝用户ID。 如果该值为空，则默认为商户签约账号对应的支付宝用户ID
-	SettleInfo          string        `json:"settle_info,omitempty"`           // 描述结算信息，json格式，详见结算参数说明
 	StoreId             string        `json:"store_id,omitempty"`              // 商户门店编号。该参数用于请求参数中以区分各门店，非必传项。
-	SubMerchant         string        `json:"sub_merchant,omitempty"`          // 间连受理商户信息体，当前只对特殊银行机构特定场景下使用此字段
+	SettleInfo          *SettleInfo   `json:"settle_info,omitempty"`           // 描述结算信息，json格式，详见结算参数说明
+	SubMerchant         *Merchant     `json:"sub_merchant,omitempty"`          // 间连受理商户信息体，当前只对特殊银行机构特定场景下使用此字段
 	TimeoutExpress      string        `json:"timeout_express,omitempty"`       // 该笔订单允许的最晚付款时间，逾期将关闭交易。取值范围：1m～15d。m-分钟，h-小时，d-天，1c-当天（1c-当天的情况下，无论交易何时创建，都在0点关闭）。 该参数数值不接受小数点， 如 1.5h，可转换为 90m。
 	TimeExpire          string        `json:"time_expire,omitempty"`           // 该笔订单绝对超时时间，格式为yyyy-MM-dd HH:mm:ss
 	MerchantOrderNo     string        `json:"merchant_order_no,omitempty"`     // 可选 商户的原始订单号
 	ExtUserInfo         *ExtUserInfo  `json:"ext_user_info,omitempty"`         // 可选 外部指定买家
 	QueryOptions        []string      `json:"query_options,omitempty"`         // 可选 通知参数选项。 商户通过传递该参数来定制需要异步通知的额外字段，数组格式。包括但不限于：["hyb_amount","enterprise_pay_info"]
+}
+
+type InvoiceInfo struct {
+	KeyInfo *InvoiceKeyInfo `json:"key_info,omitempty"` // 【描述】开票关键信息
+	Details string          `json:"details,omitempty"`  // 【描述】开票内容 注：json数组格式
+}
+
+type InvoiceKeyInfo struct {
+	IsSupportInvoice    bool   `json:"is_support_invoice"`    // 【描述】该交易是否支持开票
+	InvoiceMerchantName string `json:"invoice_merchant_name"` // 【描述】开票商户名称：商户品牌简称|商户门店简称
+	TaxNum              string `json:"tax_num"`               // 【描述】税号
 }
 
 type SignParams struct {
@@ -67,9 +78,10 @@ type ExtUserInfo struct {
 // TradePagePay 统一收单下单并支付页面接口请求参数 https://opendocs.alipay.com/apis/api_1/alipay.trade.page.pay
 type TradePagePay struct {
 	Trade
-	AuthToken   string `json:"auth_token,omitempty"`   // 针对用户授权接口，获取用户相关数据时，用于标识用户授权关系
-	QRPayMode   string `json:"qr_pay_mode,omitempty"`  // PC扫码支付的方式，支持前置模式和跳转模式。
-	QRCodeWidth string `json:"qrcode_width,omitempty"` // 商户自定义二维码宽度 注：qr_pay_mode=4时该参数生效
+	AuthToken       string `json:"auth_token,omitempty"`       // 针对用户授权接口，获取用户相关数据时，用于标识用户授权关系
+	QRPayMode       string `json:"qr_pay_mode,omitempty"`      // PC扫码支付的方式，支持前置模式和跳转模式。
+	QRCodeWidth     string `json:"qrcode_width,omitempty"`     // 商户自定义二维码宽度 注：qr_pay_mode=4时该参数生效
+	IntegrationType string `json:"integration_type,omitempty"` // 可选 请求后页面的集成方式。 枚举值： ALIAPP：支付宝钱包内 PCWEB：PC端访问 默认值为PCWEB。
 }
 
 type GoodsDetail struct {
@@ -429,10 +441,10 @@ type TradeOrderSettleRsp struct {
 // TradeCreate 统一收单交易创建接口请求参数 https://docs.open.alipay.com/api_1/alipay.trade.create/
 type TradeCreate struct {
 	Trade
-	DiscountableAmount string             `json:"discountable_amount"` // 可打折金额. 参与优惠计算的金额，单位为元，精确到小数点后两位
-	BuyerId            string             `json:"buyer_id"`            // 买家支付宝用户ID。 2088开头的16位纯数字，小程序场景下获取用户ID请参考：用户授权; 其它场景下获取用户ID请参考：网页授权获取用户信息; 注：交易的买家与卖家不能相同。
-	BuyerOpenId        string             `json:"buyer_open_id"`       // 新版接口无法获取user_id, 这里只能传递openid值
-	OpAppId            string             `json:"op_app_id,omitempty"` // 小程序支付中，商户实际经营主体的小程序应用的appid, 注意事项:商户需要先在产品管理中心绑定该小程序appid，否则下单会失败
+	DiscountableAmount string             `json:"discountable_amount"`        // 可打折金额. 参与优惠计算的金额，单位为元，精确到小数点后两位
+	BuyerId            string             `json:"buyer_id"`                   // 买家支付宝用户ID。 2088开头的16位纯数字，小程序场景下获取用户ID请参考：用户授权; 其它场景下获取用户ID请参考：网页授权获取用户信息; 注：交易的买家与卖家不能相同。
+	BuyerOpenId        string             `json:"buyer_open_id"`              // 新版接口无法获取user_id, 这里只能传递openid值
+	OpAppId            string             `json:"op_app_id,omitempty"`        // 小程序支付中，商户实际经营主体的小程序应用的appid, 注意事项:商户需要先在产品管理中心绑定该小程序appid，否则下单会失败
 	OpBuyerOpenId      string             `json:"op_buyer_open_id,omitempty"` // 当传入的 op_app_id 与发起调用的 APPID 不一致时使用，传 op_buyer_open_id 替换 buyer_open_id
 	GoodsDetail        []*GoodsDetailItem `json:"goods_detail,omitempty"`
 	OperatorId         string             `json:"operator_id"`
@@ -497,6 +509,11 @@ type AgreementParams struct {
 	ApplyToken    string `json:"apply_token,omitempty"`
 }
 
+type PayParams struct {
+	AsyncType string `json:"async_type,omitempty"`
+	RetryType string `json:"retry_type,omitempty"`
+}
+
 // TradePay 统一收单交易支付接口请求参数 https://docs.open.alipay.com/api_1/alipay.trade.pay/
 type TradePay struct {
 	Trade
@@ -514,6 +531,7 @@ type TradePay struct {
 	AuthConfirmMode    string             `json:"auth_confirm_mode,omitempty"`
 	TerminalParams     string             `json:"terminal_params,omitempty"`
 	AgreementParams    *AgreementParams   `json:"agreement_params,omitempty"`
+	PayParams          *PayParams         `json:"pay_params,omitempty"`
 }
 
 func (t TradePay) APIName() string {
