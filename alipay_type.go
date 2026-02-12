@@ -1,10 +1,12 @@
 package alipay
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/smartwalle/ngx"
 	"io"
+
+	"github.com/smartwalle/ngx"
 )
 
 const (
@@ -33,13 +35,22 @@ const (
 	kFieldTimestamp        = "timestamp"
 	kFieldVersion          = "version"
 	kFieldBizContent       = "biz_content"
+	kFieldAppAuthToken     = "app_auth_token"
+	kFieldReturnURL        = "return_url"
+	kFieldNotifyURL        = "notify_url"
+	kFieldRedirectURI      = "redirect_uri"
+	kFieldState            = "state"
+	kFieldScope            = "scope"
+	kFieldAuthToken        = "auth_token"
 	kFieldAppCertSN        = "app_cert_sn"
 	kFieldEncryptType      = "encrypt_type"
 	kFieldAliPayRootCertSN = "alipay_root_cert_sn"
-	kFieldAlyPayCertSN     = "alipay_cert_sn"
+	kFieldAliPayCertSN     = "alipay_cert_sn"
 	kCertificateBegin      = "-----BEGIN CERTIFICATE-----"
 	kCertificateEnd        = "-----END CERTIFICATE-----"
 )
+
+type ReceivedDataHandler func(ctx context.Context, method string, data []byte)
 
 // Code 支付宝接口响应错误码 https://doc.open.alipay.com/docs/doc.htm?treeId=291&articleId=105806&docType=1
 type Code string
@@ -168,39 +179,21 @@ func (p *Payload) Set(key string, value interface{}) *Payload {
 
 // AddFile 添加需要上传的文件。
 //
-// name: 参数名称。
-//
-// filename: 文件名称。
-//
-// filepath: 本地文件完整路径。
-//
-// Deprecated: use AddFilePath instead.
-func (p *Payload) AddFile(name, filename, filepath string) {
+//	key: 参数名称。
+//	filename: 文件名称。
+//	filepath: 本地文件完整路径。
+func (p *Payload) AddFile(key, filename, filepath string) {
 	if p.files == nil {
 		p.files = ngx.FileForm{}
 	}
-	p.files.AddFilePath(name, filename, filepath)
+	p.files.AddFile(key, filename, filepath)
 }
 
-// AddFilePath 添加需要上传的文件。
-//
-// name: 参数名称。
-//
-// filename: 文件名称。
-//
-// filepath: 本地文件完整路径。
-func (p *Payload) AddFilePath(name, filename, filepath string) {
+func (p *Payload) AddObject(key, filename string, file io.Reader) {
 	if p.files == nil {
 		p.files = ngx.FileForm{}
 	}
-	p.files.AddFilePath(name, filename, filepath)
-}
-
-func (p *Payload) AddFileObject(name, filename string, file io.Reader) {
-	if p.files == nil {
-		p.files = ngx.FileForm{}
-	}
-	p.files.AddFileObject(name, filename, file)
+	p.files.AddObject(key, filename, file)
 }
 
 func (p *Payload) MarshalJSON() ([]byte, error) {
@@ -239,7 +232,7 @@ func (c CertDownload) APIName() string {
 
 func (c CertDownload) Params() map[string]string {
 	var m = make(map[string]string)
-	m["app_auth_token"] = c.AppAuthToken
+	m[kFieldAppAuthToken] = c.AppAuthToken
 	return m
 }
 
