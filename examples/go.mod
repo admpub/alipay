@@ -10,7 +10,7 @@ require (
 require (
 	github.com/admpub/alipay/v3 v3.2.28 // indirect
 	github.com/smartwalle/ncrypto v1.0.4 // indirect
-	github.com/smartwalle/ngx v1.1.0 // indirect
+	github.com/smartwalle/ngx v1.1.2 // indirect
 	github.com/smartwalle/nsign v1.0.9 // indirect
 )
 
